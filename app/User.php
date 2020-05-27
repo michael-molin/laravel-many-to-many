@@ -15,6 +15,7 @@ class User extends Authenticatable
      *
      * @var array
      */
+     // definisco valori User
     protected $fillable = [
         'name', 'email', 'password',
     ];
@@ -37,6 +38,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
+    // Applico relazione 1 - molti con user dalla parte di 1
     public function info()
     {
         return $this->hasOne('App\InfoUser');

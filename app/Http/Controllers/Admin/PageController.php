@@ -4,6 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\category;
+use App\User;
+use App\Tag;
+use App\Photo;
+use App\Page;
 
 class PageController extends Controller
 {
@@ -14,7 +19,13 @@ class PageController extends Controller
      */
     public function index()
     {
-        //
+        $categories = Category::all();
+        $users = User::all();
+        $tags = Tag::all();
+        $photos = Photo::all();
+        $pages = Page::all();
+
+        return view('admin.pages.index' , compact('categories', 'users' , 'tags' , 'photos', 'pages'));
     }
 
     /**
@@ -24,7 +35,13 @@ class PageController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::all();
+        $users = User::all();
+        $tags = Tag::all();
+        $photos = Photo::all();
+        $pages = Page::all();
+
+        return view('admin.pages.create' , compact('categories', 'users' , 'tags' , 'photos', 'pages'));
     }
 
     /**
