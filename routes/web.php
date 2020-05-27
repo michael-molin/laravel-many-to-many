@@ -20,3 +20,15 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+
+Route::prefix('admin')
+    ->name('admin.')
+    ->namespace('Admin')
+    ->middleware('auth')
+    ->group(function() {
+        Route::resource('pages' , 'PageController');
+        Route::resource('photos' , 'PhotoController');
+        Route::resource('categories' , 'CategoryController');
+        Route::resource('tags' , 'TagController');
+        Route::resource('users' , 'UserController');
+    });
