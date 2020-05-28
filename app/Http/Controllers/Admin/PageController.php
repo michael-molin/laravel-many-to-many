@@ -25,7 +25,7 @@ class PageController extends Controller
         $photos = Photo::all();
         $pages = Page::all();
 
-        return view('admin.pages.index' , compact('categories', 'users' , 'tags' , 'photos', 'pages'));
+        return view('admin.pages.index' , compact('pages'));
     }
 
     /**

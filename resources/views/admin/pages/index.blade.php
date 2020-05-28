@@ -10,7 +10,6 @@
                         <th>Sommario</th>
                         <th>Testo</th>
                         <th>Categorie</th>
-                        <th>Foto</th>
                         <th>Tag</th>
                     </thead>
                     <tbody>
@@ -20,8 +19,11 @@
                             <td>{{$page->title}}</td>
                             <td>{{$page->summary}}</td>
                             <td>{{$page->body}}</td>
-                            <td>{{$page->$categories->name}}</td>
-                            <td><</td>
+                            <td>{{$page->category->name}}</td>
+                            <td>@foreach ($page->tags as $tag)
+                                {{$tag->name}} <br>
+                                @endforeach
+                            </td>
                             <td></td>
                         </tr>
                         @endforeach
