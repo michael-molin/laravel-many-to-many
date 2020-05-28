@@ -5,8 +5,7 @@
             <div class="col-12">
                 <table class="table">
                     <tr>
-                        <td><a class="btn btn-primary" href="{{route('admin.pages.create')}}"> Crea Nuova Pagina</a></td>
-                        <td><a class="btn btn-primary" href="{{route('home')}}">Torna alla Home</a></td>
+                        <td><a class="btn btn-primary" href="{{route('admin.pages.index')}}">Torna alla Index</a></td>
                     </tr>
                 </table>
                 <table class="table">
@@ -17,10 +16,9 @@
                         <th>Testo</th>
                         <th>Categorie</th>
                         <th>Tag</th>
-                        <th colspan="3"> Azioni</th>
+                        <th colspan="2"> Azioni</th>
                     </thead>
                     <tbody>
-                        @foreach ($pages as $page)
                         <tr>
                             <td>{{$page->id}}</td>
                             <td>{{$page->title}}</td>
@@ -33,7 +31,6 @@
                                 {{$tag->name}} <br>
                                 @endforeach
                             </td>
-                            <td><a class ="btn btn-primary" href="{{route('admin.pages.show', $page->slug)}}">Visualizza</a></td>
                             <td><a class ="btn btn-secondary" href="{{route('admin.pages.edit', $page->id)}}">Modifica</a></td>
                             <td>
                                 {{-- Se l'id con cui ho fatto l'accesso alla sezione login è uguale all'id utente nel dato page->user_id (ovvero il creatore del post) allora mi compare l'opzione per cancellare il post --}}
@@ -44,11 +41,10 @@
                                     @method('DELETE')
                                     <input class="btn btn-danger" type="submit" value="Elimina">
                                     </form>
-
+                                
                                 @endif
                             </td>
                         </tr>
-                        @endforeach
                     </tbody>
                 </table>
             </div>
