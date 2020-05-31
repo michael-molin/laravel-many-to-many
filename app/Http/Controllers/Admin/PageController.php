@@ -6,14 +6,20 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+
 
 use App\category;
 use App\User;
 use App\Tag;
 use App\Photo;
 use App\Page;
+
+// importazioni per utilizzare lo strumento mail
+use App\Mail\NewMail;
+use Illuminate\Support\Facades\Mail;
 
 class PageController extends Controller
 {
@@ -69,9 +75,10 @@ class PageController extends Controller
             'category_id' => 'required|exists:categories,id',
             // controllo di ricevere gli array con tutte le foto e tutti i tag disponibili, e controllo poi che esistano in tutto l'array
             'tags' => 'required|array',
-            'photos' => 'required|array',
             'tags.*' => 'exists:tags,id',
-            'photos.*' => 'exists:photos,id'
+            // Oscuro le foto nel validator perchè potrei non utilizzare foto dall'array ma usarne di nuove
+            // 'photos' => 'required|array',
+            // 'photos.*' => 'exists:photos,id'
         ]);
 
         // se la validazione fallisce, torno a create e restituisco come input gli errori del validator
@@ -79,6 +86,20 @@ class PageController extends Controller
             return redirect()->route('admin.pages.create')
             ->withErrors($validator)
             ->withInput();
+        }
+
+        // GESTIONE FOTO, ricordarsi il comando da terminale per assegnare lo storage. PHP ARTISAN STORAGE:LINK
+        // Check se è stata inserita una foto nuova, ISSET significa se esiste tale valore
+        if(isset($data['photo'])) {
+            // creo la variabile path, l'istruzione di inserire il data[photo] nello storage/public/image mi restituisce il percorso del file (Quindi Path ha al suo interno un indirizzo)
+            $path = Storage::disk('public')->put('images', $data['photo']);
+            // creo istanza nuova photo con tutti i dati richiesti dal Model Photo per poter salvare tale dato nel DB //
+            $photo = new Photo;
+            $photo->user_id = Auth::id();
+            $photo->name = $data['title'];
+            $photo->path = $path;
+            $photo->description = 'Lorem';
+            $photo->save();
         }
 
         //Creo una nuova istanza Page e assegno i valori di data. Poi faccio un check se il salvataggio è andato a buon fine
@@ -91,7 +112,16 @@ class PageController extends Controller
 
         //In questo caso creo dei nuovi dati nella tabella di mezzo (pivot) dato che la relazione tra pages-tags e pages-photo è di Molti - Molti
         $page->tags()->attach($data['tags']);
-        $page->photos()->attach($data['photos']);
+
+        // Qui faccio un check, se è stata inserita una nuova foto faccio un attach di Photo, altrimenti faccio un attach della foto già presente nell'array
+        if (!isset($photo)) {
+            $page->photos()->attach($data['photos']);
+        } else {
+            $page->photos()->attach($photo);
+        }
+
+        // Invio mail fake, invia come mail una pagina blade a cui passiamo la variabile $page
+        Mail::to('mail@mail.it')->send(new NewMail($page));
 
         return redirect()->route('admin.pages.index');
     }
@@ -149,6 +179,21 @@ class PageController extends Controller
         }
 
         $data = $request->all();
+
+        // check nell'update se è stata inserita una nuova foto
+        if(isset($data['photo'])) {
+            // creo la variabile path, l'istruzione di inserire il data[photo] nello storage/public/image mi restituisce il percorso del file (Quindi Path ha al suo interno un indirizzo)
+            $path = Storage::disk('public')->put('images', $data['photo']);
+            // creo istanza nuova photo con tutti i dati richiesti dal Model Photo per poter salvare tale dato nel DB //
+            $photo = new Photo;
+            $photo->user_id = Auth::id();
+            $photo->name = $data['title'];
+            $photo->path = $path;
+            $photo->description = 'Lorem';
+            $photo->save();
+        }
+
+
         $page ->fill($data);
         $updated = $page->update();
         if (!$updated) {
@@ -157,7 +202,12 @@ class PageController extends Controller
 
         // sincronizzo tabella ponte, l'update mi restituisce l'id del dato modificato, quindi vado a sincronizzare sia l'id pagina che l'id tag/foto
        $page->tags()->sync($data['tags']);
-       $page->photos()->sync($data['photos']);
+
+       if (isset($photo)) {
+           $page->photos()->sync($data['photo']);
+       } else {
+           $page->photos()->sync($data['photos']);
+       }
 
        return redirect()->route('admin.pages.index');
     }
@@ -175,6 +225,7 @@ class PageController extends Controller
         // prima di cancellare, elimino i collegamenti della tabella ponte
         $page->tags()->detach();
         $page->photos()->detach();
+
         $deleted = $page->delete();
 
         if(!$deleted){

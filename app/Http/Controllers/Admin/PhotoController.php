@@ -80,6 +80,13 @@ class PhotoController extends Controller
      */
     public function destroy($id)
     {
-        //
+        // check se esiste l'id di quella foto e faccio il detach dalle tabelle pivot
+        $photo = Photo::findOrFail($id);
+        $photo->pages()->detach();
+
+        // cancello la foto presente nello storage e poi nel db
+        $deleted = Storage::disk('public')->delete($photo->path);
+        $photo->delete();
+        return redirect()->back();
     }
 }

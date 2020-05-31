@@ -8,7 +8,7 @@
                 {{$message}}
             @endforeach
             {{-- Fine sezione --}}
-          <form action="{{route('admin.pages.update' , $page->id)}}" method="POST">
+          <form action="{{route('admin.pages.update' , $page->id)}}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
             <div class="form-group">
@@ -36,20 +36,38 @@
             </div>
             <div class="form-group">
                 <h3>Tags</h3>
-                @foreach ($tags as $key => $tag)
+                @foreach ($tags as $tag)
                     <label for="tags-{{$tag->id}}">{{$tag->name}}</label>
-                    {{-- operatore ternario: Se è presente un old(tag + chiave che rappresenta lo stesso valore dell'id) OPPURE i precedenti collegamenti tra page->tags (rapporto a molti) che sono PRESENTI nella tabella TAGS sono checked  --}}
+                    {{-- operatore ternario: Se esiste un old(tag + chiave che rappresenta lo stesso valore dell'id) E i tag old sono presenti nell'array tag dato dal database sono checked  --}}
                     <input type="checkbox" name="tags[]" value="{{$tag->id}}"
-                    {{(!empty(old('tags.'. $key)) ||  $page->tags->contains($tag->id)) ? 'checked' : ''}}>
+                    {{(is_array(old('tags.')) &&  in_array($tag->id, old('tags'))) ? 'checked' : ''}}>
                 @endforeach
             </div>
             <div class="form-group">
                 <h3>Photos</h3>
                 @foreach ($photos as $photo)
-                    {{-- vedi operatore ternario tags --}}
-                    <label for="photos-{{$photo->id}}">{{$photo->name}}</label>
-                    <input type="checkbox" name="photos[]" id="photos-{{$photo->id}}" value="{{$photo->id}}" {{(!empty(old('photos.'. $key)) ||  $page->photos->contains($photo->id)) ? 'checked' : ''}}>
+                    <div class="photo-card">
+                        <div class="card-top">
+                            {{-- IMG oscurato in quanto le istanze di foto precedenti non sono state inserite nello storage --}}
+                            {{-- <img class="card-img-top" src="{{asset('storage/' . $photos->path)}}" alt="{{$photo->description}}"> --}}
+                        </div>
+                        <div class="card-bot">
+                            {{-- vedi operatore ternario tags --}}
+                            <label for="photos-{{$photo->id}}">{{$photo->name}}</label>
+                            <input type="checkbox" name="photos[]" id="photos-{{$photo->id}}" value="{{$photo->id}}" {{(!empty(old('photos')) ||  $page->photos->contains($photo->id)) ? 'checked' : ''}}>
+                            <form action="{{route('admin.photos.destroy' , $photo->id)}}" method="post">
+                            @csrf
+                            @method('DELETE')
+                            <input class="btn btn-danger" type="submit" value="Elimina Foto">
+                            </form>
+                        </div>
+                    </div>
                 @endforeach
+                {{-- possibilità di aggiungere nuova foto --}}
+                <div class="new-photo">
+                    <label for="photo">Aggiungi nuova foto: </label>
+                    <input type="file" name="photo" id="photo">
+                </div>
             </div>
             <input type="submit" value="Salva" class="btn btn-primary">
           </form>

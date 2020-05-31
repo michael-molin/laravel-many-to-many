@@ -44,7 +44,6 @@
                                     @method('DELETE')
                                     <input class="btn btn-danger" type="submit" value="Elimina">
                                     </form>
-
                                 @endif
                             </td>
                         </tr>
