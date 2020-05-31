@@ -4,6 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
+
+
+use App\category;
+use App\User;
+use App\Tag;
+use App\Photo;
+use App\Page;
 
 class PhotoController extends Controller
 {
